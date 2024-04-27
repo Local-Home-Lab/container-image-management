@@ -22,7 +22,7 @@ jobs:
 
       - name: Re-tagging the Image
         run: |
-          docker tag jc21/nginx-proxy-manager:latest ${{ secrets.DOCKER_REGISTERY }}/nginx-proxy-manager:latest
+          docker tag jc21/nginx-proxy-manager:latest ${{ secrets.DOCKER_REGISTERY }}/container-image-management:nginx-proxy-manager
 
       - name: Docker Login
         uses: docker/login-action@v3.1.0
@@ -33,4 +33,32 @@ jobs:
 
       - name: Pushing the Image
         run: |
-          docker push ${{ secrets.DOCKER_REGISTERY }}/nginx-proxy-manager:latest
+          docker push ${{ secrets.DOCKER_REGISTERY }}/container-image-management:nginx-proxy-manager
+
+  bookstack:
+    runs-on: ubuntu-latest
+    needs: nginx-proxy-manager
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      - name: Downloading the Latest Docker Image
+        run: |
+          docker pull linuxserver/bookstack:latest
+
+      - name: Re-tagging the Image
+        run: |
+          docker tag linuxserver/bookstack:latest ${{ secrets.DOCKER_REGISTERY }}/container-image-management:bookstack
+
+      - name: Docker Login
+        uses: docker/login-action@v3.1.0
+        with:
+          registry: ${{ secrets.DOCKER_REGISTERY_URL }}
+          username: ${{ secrets.DOCKER_LOGIN }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Pushing the Image
+        run: |
+          docker push ${{ secrets.DOCKER_REGISTERY }}/container-image-management:bookstack
